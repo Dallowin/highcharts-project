@@ -1,17 +1,47 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+   <div v-if="chartsData">
+       <highcharts :chartsValue="chartsData" />
+       <datatable :chartsValue="chartsData" />
+   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import Chart from "./components/Chart.vue"
+import Table from "./components/Table.vue"
 
 export default {
-  name: 'App',
-  components: {
-    HelloWorld
-  }
-}
+    name: "App",
+    components: {
+        highcharts: Chart,
+        datatable: Table
+    },
+    data: () => ({
+        chartsData: []
+    }),
+    async mounted() {
+        await this.getData()
+    },
+    methods: {
+        async getData() {
+            const { data } = await this.axios.get(
+                "https://test-task-for-frontend.herokuapp.com/data"
+            );
+            if (data.has_data) {
+                
+                this.chartsData = data.items.map((item) => {
+                    const items = item.data.map(({ date, value }) => {
+                        return [date, value];
+                    });
+                    return {
+                        name: item.name,
+                        data: items,
+                    };
+                })
+
+            }
+        }
+    }
+};
 </script>
 
 <style>
